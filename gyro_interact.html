@@ -30,18 +30,26 @@
         z-index: 1;
     }
 
+    .popup {
+        width: 10px;
+        height: 4px;
+        background-color: 0xff0000;
+        opacity: 0.6;
+    }
+
     </style>
 </head>
 <body>
     <script src="js/three.min.js"></script>
     <script src="js/renderers/CSS3DRenderer.js"></script>
+    <script src="js/jquery-1.8.2.min.js"></script>
 
     <div class="main">
         <h2>Device Orientation</h2>
         <table>
             <tbody><tr>
                 <td>Event Supported</td>
-                <td id="doEvent">DeviceOrientation</td>
+                <td id="doEvent">DeviceOrientation:</td>
             </tr>
             <tr>
                 <td>Roll [gamma]</td>
@@ -64,7 +72,7 @@
     var geometry, material, mesh;
     var target = new THREE.Vector3();
 
-    var lon = 90, lat = 0;
+    var lon = 0, lat = 0;
     var phi = 0, theta = 0;
 
     var touchX, touchY;
@@ -73,6 +81,7 @@
     var yaw, roll, pitch;
     var hlookat = 0;
     var vlookat = 0;
+    var hasGyro = false;
 
     init();
     animate();
@@ -134,24 +143,29 @@
         var plane = new THREE.Object3D();
         scene.add(plane);
 
+
+        // build iteractive planes
+
         // params
         var r = Math.PI / 2;
         var d = 50;
         var pos = [ [ d, 0, 0 ], [ 20, 5, -25 ], [ 0, 0, -d ]];
         var rot = [ [ 0, r, 0 ], [ 0, -r/2, 0 ], [ 0, 0, 0 ]];
 
-        // build planes
+        
         for ( var i = 0; i < 3; i ++ ) {
 
-            var divTag = document.createElement('div');
-            divTag.style.width = '10px';
-            divTag.style.height = '4px';
-            divTag.style.background = new THREE.Color( 0xffffff ).getStyle();
-            divTag.style.opacity = '0.6';
-            divTag.id = "divBox_" + i;
+            var element = document.createElement( 'div');
+            
+            element.style.width = "10px";
+            element.style.height = "2px";
+            element.style.background = new THREE.Color( 0xffffff ).getStyle();
+            element.style.opacity = "0.7";
+            element.id = "popup_" + i;
 
+            console.log("element = " + element);
 
-            var divObject = new THREE.CSS3DObject(divTag);
+            var divObject = new THREE.CSS3DObject(element);
             divObject.position.fromArray(pos[i]);
             divObject.rotation.fromArray(rot[i]);
             plane.add(divObject);
@@ -171,6 +185,7 @@
         // test for compass
         if (window.DeviceOrientationEvent) {
             window.addEventListener('deviceorientation', compassTest);
+            hasGyro = true;
         } else {
             console.log("startMouseNav");
             startMouseNav();
@@ -179,6 +194,8 @@
 
         renderer = new THREE.CSS3DRenderer();
         renderer.setSize( window.innerWidth, window.innerHeight );
+        renderer.domElement.style.position = 'absolute';
+        renderer.domElement.style.top = 0;
         document.body.appendChild( renderer.domElement );
 
     }
@@ -202,19 +219,9 @@
         document.addEventListener( 'mousedown', onDocumentMouseDown, false );
         document.addEventListener( 'mousewheel', onDocumentMouseWheel, false );
 
-        document.addEventListener( 'touchstart', onDocumentTouchStart, false );
-        document.addEventListener( 'touchmove', onDocumentTouchMove, false );
-
         window.addEventListener( 'resize', onWindowResize, false );
     }
 
-    function onWindowResize() {
-
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-
-        renderer.setSize( window.innerWidth, window.innerHeight );
-    }
 
     function onDocumentMouseDown( event ) {
 
@@ -240,6 +247,8 @@
         document.removeEventListener( 'mousemove', onDocumentMouseMove );
         document.removeEventListener( 'mouseup', onDocumentMouseUp );
 
+        document.getElementById("doTiltLR").innerHTML = lon;
+        document.getElementById("doTiltFB").innerHTML = lat;
     }
 
     function onDocumentMouseWheel( event ) {
@@ -249,29 +258,12 @@
 
     }
 
-    function onDocumentTouchStart( event ) {
+     function onWindowResize() {
 
-        event.preventDefault();
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
 
-        var touch = event.touches[ 0 ];
-
-        touchX = touch.screenX;
-        touchY = touch.screenY;
-
-    }
-
-    function onDocumentTouchMove( event ) {
-
-        event.preventDefault();
-
-        var touch = event.touches[ 0 ];
-
-        lon -= ( touch.screenX - touchX ) * 0.1;
-        lat += ( touch.screenY - touchY ) * 0.1;
-
-        touchX = touch.screenX;
-        touchY = touch.screenY;
-
+        renderer.setSize( window.innerWidth, window.innerHeight );
     }
 
     
@@ -340,8 +332,15 @@
         lat = Math.max( - 85, Math.min( 85, lat ) );
         //phi = THREE.Math.degToRad( 90 - lat );
         //theta = THREE.Math.degToRad( lon );
-        phi = THREE.Math.degToRad( 180 - roll );
-        theta = THREE.Math.degToRad( 90 - yaw );
+
+        if (hasGyro) {
+            phi = THREE.Math.degToRad( 180 - roll );
+            theta = THREE.Math.degToRad( 90 - yaw );
+        } else {
+            phi = THREE.Math.degToRad( 90 - lat );
+            theta = THREE.Math.degToRad( lon );
+        }
+        
         
 
         target.x = Math.sin( phi ) * Math.cos( theta );
