@@ -8,7 +8,7 @@
     body {
         background-color: #000000;
         margin: 0;
-        cursor: move;
+        cursor: default;
         overflow: hidden;
     }
 
@@ -21,10 +21,10 @@
         border: 1px solid black;
         box-shadow: 10px 10px 5px #888;
         border-radius: 12px;
-        padding: 10px;
+        padding: 5px;
         background-color: #ddd;
         margin: 25px;
-        width: 450px;
+        width: 300px;
         margin-left:auto;
         margin-right:auto;  
         z-index: 1;
@@ -35,6 +35,11 @@
         height: 4px;
         background-color: 0xff0000;
         opacity: 0.6;
+        cursor: pointer;
+    }
+    .selected {
+        background: red;
+        background-color: 0xff0000;
     }
 
     </style>
@@ -43,6 +48,7 @@
     <script src="js/three.min.js"></script>
     <script src="js/renderers/CSS3DRenderer.js"></script>
     <script src="js/jquery-1.8.2.min.js"></script>
+    <script src="js/libs/stats.min.js"></script>
 
     <div class="main">
         <h2>Device Orientation</h2>
@@ -68,9 +74,13 @@
 
     <script>
 
+    var container, stats;
+
     var camera, scene, renderer;
     var geometry, material, mesh;
     var target = new THREE.Vector3();
+    var containerWidth = window.innerWidth;
+    var containerHeight = window.innerHeight;
 
     var lon = 0, lat = 0;
     var phi = 0, theta = 0;
@@ -83,14 +93,30 @@
     var vlookat = 0;
     var hasGyro = false;
 
+    var plane = new THREE.Object3D();
+
     init();
+    initStats();
     animate();
 
-    function init() {
+    function initStats() 
+    {
+        stats = new Stats();
+        stats.setMode(1);
 
-        camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
+        // Align top left
+        stats.domElement.style.position = 'absolute';
+        stats.domElement.style.left = '400px';
+        stats.domElement.style.top = '0px';
 
+        document.body.appendChild( stats.domElement );
+
+    }
+
+    function init() 
+    {
         scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera( 75, containerWidth / containerHeight, 1, 1000 );
 
         var sides = [
         {
@@ -125,7 +151,8 @@
         }
         ];
 
-        for ( var i = 0; i < sides.length; i ++ ) {
+        for ( var i = 0; i < sides.length; i ++ ) 
+        {
 
             var side = sides[ i ];
 
@@ -140,11 +167,10 @@
 
         }
 
-        var plane = new THREE.Object3D();
-        scene.add(plane);
-
 
         // build iteractive planes
+
+        scene.add(plane);
 
         // params
         var r = Math.PI / 2;
@@ -153,7 +179,8 @@
         var rot = [ [ 0, r, 0 ], [ 0, -r/2, 0 ], [ 0, 0, 0 ]];
 
         
-        for ( var i = 0; i < 3; i ++ ) {
+        for ( var i = 0; i < 3; i ++ ) 
+        {
 
             var element = document.createElement( 'div');
             
@@ -162,24 +189,24 @@
             element.style.background = new THREE.Color( 0xffffff ).getStyle();
             element.style.opacity = "0.7";
             element.id = "popup_" + i;
+            element.className = "popup";
+            element.addEventListener('mouseover', onPopupOver);
+            element.addEventListener('mouseup', onPopupClick);
 
-            console.log("element = " + element);
+            
 
             var divObject = new THREE.CSS3DObject(element);
             divObject.position.fromArray(pos[i]);
             divObject.rotation.fromArray(rot[i]);
+
+            //console.log("element = " + element.id);
+            //console.log("divObject = " + divObject.id);
+
             plane.add(divObject);
 
         }
 
-        // add subtle blue ambient lighting
-        var ambientLight = new THREE.AmbientLight(0x000044);
-        scene.add(ambientLight);
-
-        // directional lighting
-        var directionalLight = new THREE.DirectionalLight(0xffffff);
-        directionalLight.position.set(1, 1, 1).normalize();
-        scene.add(directionalLight);
+        scene.add(plane);
 
 
         // test for compass
@@ -187,8 +214,8 @@
             window.addEventListener('deviceorientation', compassTest);
             hasGyro = true;
         } else {
-            console.log("startMouseNav");
-            startMouseNav();
+            //console.log("startMouseNav");
+            //startMouseNav();
         }
 
 
@@ -199,6 +226,27 @@
         document.body.appendChild( renderer.domElement );
 
     }
+
+    // ----------   Pick object  --------
+
+    function onPopupOver( e )
+    {
+        console.log("picked : " + e.target.id);
+        //e.target.style.background = "red";
+        $(e.target).css({ "background": "red" });
+
+    }
+
+    function onPopupClick( e )
+    {
+        console.log("picked : " + e.target.id);
+        e.target.style.background = "white";
+        $(e.target).text("label: " + e.target.id);
+
+    }
+
+    // ----------   End Pick object  --------
+
 
     function compassTest(event)
     {
@@ -264,6 +312,8 @@
         camera.updateProjectionMatrix();
 
         renderer.setSize( window.innerWidth, window.innerHeight );
+        containerWidth = window.innerWidth;
+        containerHeight = window.innerHeight;
     }
 
     
@@ -354,11 +404,10 @@
         */
         
         camera.lookAt( target );
-        //camera.rotation.x = yaw;
-        //camera.rotation.y = yaw;
-        //camera.rotation.z = yaw;
         
         renderer.render( scene, camera );
+
+        stats.update();
         
     }
     
