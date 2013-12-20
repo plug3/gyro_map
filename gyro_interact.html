@@ -4,45 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <title>three.js css3d - panorama</title>
-    <style>
-    body {
-        background-color: #000000;
-        margin: 0;
-        cursor: default;
-        overflow: hidden;
-    }
-
-    a {
-        color: #ffffff;
-    }
-
-    .main {
-        position:absolute;
-        border: 1px solid black;
-        box-shadow: 10px 10px 5px #888;
-        border-radius: 12px;
-        padding: 5px;
-        background-color: #ddd;
-        margin: 25px;
-        width: 300px;
-        margin-left:auto;
-        margin-right:auto;  
-        z-index: 1;
-    }
-
-    .popup {
-        width: 10px;
-        height: 4px;
-        background-color: 0xff0000;
-        opacity: 0.6;
-        cursor: pointer;
-    }
-    .selected {
-        background: red;
-        background-color: 0xff0000;
-    }
-
-    </style>
+    <link rel="stylesheet" href="css/style.css" type="text/css" media="screen" />
 </head>
 <body>
     <script src="js/three.min.js"></script>
@@ -51,7 +13,7 @@
     <script src="js/libs/stats.min.js"></script>
 
     <div class="main">
-        <h2>Device Orientation</h2>
+        <h2>Device Orientation</h2> 
         <table>
             <tbody><tr>
                 <td>Event Supported</td>
@@ -71,6 +33,7 @@
             </tr>
         </tbody></table>
     </div>
+    <div class="popup" id="3"></div>
 
     <script>
 
@@ -92,6 +55,9 @@
     var hlookat = 0;
     var vlookat = 0;
     var hasGyro = false;
+
+    var currentId = "none";
+    var popContent = ["The best store in town", "Incredible food at very good price", "lorem ipsum", "ici on parle francais"];
 
     var plane = new THREE.Object3D();
 
@@ -168,15 +134,15 @@
         }
 
 
-        // build iteractive planes
+        // build iteractive popup
 
         scene.add(plane);
 
         // params
         var r = Math.PI / 2;
-        var d = 50;
-        var pos = [ [ d, 0, 0 ], [ 20, 5, -25 ], [ 0, 0, -d ]];
-        var rot = [ [ 0, r, 0 ], [ 0, -r/2, 0 ], [ 0, 0, 0 ]];
+        var d = 250;
+        var pos = [ [ 300, 40, -10 ], [ 300, 20, -200 ], [ 0, 0, -d ], [ 300, 150, 150 ]];
+        var rot = [ [ 0, -1.2, 0 ], [ 0, -r/2, 0 ], [ 0, 0, 0 ], [ 0, -2.5, 0 ]];
 
         
         for ( var i = 0; i < 3; i ++ ) 
@@ -184,12 +150,14 @@
 
             var element = document.createElement( 'div');
             
-            element.style.width = "10px";
-            element.style.height = "2px";
+            element.style.width = "100px";
+            element.style.height = "20px";
             element.style.background = new THREE.Color( 0xffffff ).getStyle();
             element.style.opacity = "0.7";
-            element.id = "popup_" + i;
+            //element.style.color = new THREE.Color( 0x000000 ).getStyle();
+            element.id = i;
             element.className = "popup";
+            element.innerHTML = "Location " + i;
             element.addEventListener('mouseover', onPopupOver);
             element.addEventListener('mouseup', onPopupClick);
 
@@ -205,6 +173,19 @@
             plane.add(divObject);
 
         }
+
+        // test popup
+        var element = document.getElementById('3');
+        $(element).addClass("popup");
+        element.addEventListener('mouseup', onPopupClick);
+        element.innerHTML = "Location " + i;
+
+        var divObject = new THREE.CSS3DObject(element);
+        divObject.position.fromArray(pos[3]);
+        divObject.rotation.fromArray(rot[3]);
+        plane.add(divObject);
+
+        // --------  End test popup
 
         scene.add(plane);
 
@@ -233,16 +214,35 @@
     {
         console.log("picked : " + e.target.id);
         //e.target.style.background = "red";
-        $(e.target).css({ "background": "red" });
+        //$(e.target).css({ "background":"#aaffaa"});
 
     }
 
     function onPopupClick( e )
     {
-        console.log("picked : " + e.target.id);
-        e.target.style.background = "white";
-        $(e.target).text("label: " + e.target.id);
+        // rest previous selection if exists
+        if (currentId != "none") {
+            $("#" + currentId).text("Location: " + currentId);
+            $("#" + currentId).animate({
+            top:'0px',
+            opacity:'0.75',
+            height:'20px'
+          }, 200);
+        }
+        
 
+        // update new selection
+        currentId = e.target.id;
+        console.log("picked : " + e.target.id);
+        //$(e.target).css({ "background": "#aaffaa", "height":"150px", "" });
+        $("#" + currentId).text(popContent[currentId]);
+
+        $(e.target).animate({
+            top:'-40px',
+            opacity:'1',
+            height:'100px'
+          }, 200);
+        
     }
 
     // ----------   End Pick object  --------
