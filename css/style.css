@@ -9,6 +9,17 @@ body {
         color: #ffffff;
     }
 
+    h1 {
+    	font-size: 8px;
+    }
+    p {
+    	font-size: 6px;
+    }
+
+    video {
+    	display: none;
+    }
+
     .main {
         position:absolute;
         border: 1px solid black;
@@ -23,17 +34,25 @@ body {
         z-index: 1;
     }
 
+
     .popup {
-    	padding: 5px;
+		position: fixed;
     	border: 1px solid grey;
-        border-radius: 2px;
+        border-radius: 5px;
         color: black;
-        font-size: 8px;
+        font-size: 6px;
         width: 100px;
         height: 20px;
-        background-color: #dfd;
-        opacity: 0.9;
+        background-color: #fff;
+        opacity: 0.75;
         cursor: pointer;
+    }
+
+    .content {
+    	padding: 5px;
+    	color: black;
+        font-size: 8px;
+        background-color: #aaa;
     }
     .selected {
         background: red;
