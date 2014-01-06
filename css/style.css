@@ -10,15 +10,18 @@ body {
     }
 
     h1 {
-    	font-size: 8px;
+    	font-size: 10px;
     }
     p {
-    	font-size: 6px;
+    	font-size: 10px;
+        display: none;
     }
 
     video {
-    	display: none;
+        display: none;
     }
+
+
 
     .main {
         position:absolute;
@@ -36,6 +39,7 @@ body {
 
 
     .popup {
+        padding: 5px;
 		position: fixed;
     	border: 1px solid grey;
         border-radius: 5px;
@@ -46,15 +50,24 @@ body {
         background-color: #fff;
         opacity: 0.75;
         cursor: pointer;
+        display: inline-block;
     }
 
-    .content {
-    	padding: 5px;
-    	color: black;
-        font-size: 8px;
-        background-color: #aaa;
+    .selected{
+        background-color: #fff;
     }
-    .selected {
-        background: red;
-        background-color: 0xff0000;
+    .unselected{
+        background-color: #fff;
+    }
+
+    .selected p{
+        display: inline-block;
+    }
+
+    .unselected p{
+        display: none;
+    }
+
+    .selected video{
+        display: block;
     }
