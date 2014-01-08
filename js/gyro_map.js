@@ -19,6 +19,7 @@ window.onload = function() {
 
     // popup rotations:
     var rot = [ -1.2, -r/2, 0, -2.5];
+    var rotCam = [-r, -r/2, 0, -r]
 
     var yaw, roll, pitch;
     var hlookat = 0;
@@ -40,7 +41,7 @@ window.onload = function() {
 
         // Align top left
         stats.domElement.style.position = 'absolute';
-        stats.domElement.style.left = '400px';
+        stats.domElement.style.left = '0px';
         stats.domElement.style.top = '0px';
 
         document.body.appendChild( stats.domElement );
@@ -108,8 +109,8 @@ window.onload = function() {
         // params
         
         var d = 250;
-        var pos = [ [ 300, 40, -10 ], [ 300, 20, -200 ], [ 0, 0, -d ], [ 300, 150, 150 ]];
-        //var rot = [ [ 0, -1.2, 0 ], [ 0, -r/2, 0 ], [ 0, 0, 0 ], [ 0, -2.5, 0 ]];
+        var pos = [ [ 350, 40, -30 ], [ 350, 30, -300 ], [ 0, 0, -d ], [ 280, 140, 150 ]];
+        //var rot = [ [ 0, -1.2, 0 ], [ 0, -r/2.2, 0 ], [ 0, 0, 0 ], [ 0, -2.5, 0 ]];
         
 
         // initialize popups
@@ -154,12 +155,36 @@ window.onload = function() {
 
     function onPopupClick( e )
     {
-        // rest previous selection if exists
-        console.log("clicked on id: " + currentId);
+        var clicked_id = e.target.id;
+        console.log("clicked on id: " + clicked_id);
+        // test if video is clicked
+        if (clicked_id.charAt(0) === 'v') {
+            //video is clicked > play now?
+            $('#video' + currentId).get(0).play();
+            return;
+        }
+
+        // determine the div of new selection
+
+        if (clicked_id === "") {
+            console.log("Finding parent div");
+            console.log("this has class : " + $(this).attr('class'));
+            clicked_id = $(this).closest('div').attr('id');;
+            console.log("this has id : " + clicked_id);
+        }
+        console.log("picked : " + clicked_id);
+
+
+        // do nothing if it is current
+        if (clicked_id === currentId) {
+            return;
+        }
+
+        // restore previous selection if exists
         if (currentId != "") {
 
             //$("#" + currentId).text("Location: " + currentId);
-            TweenMax.to("#" + currentId, 0.5, {opacity:'0.75', width:'100px', height:'20px', ease:Expo.easeOut});
+            TweenMax.to("#" + currentId, 0.5, {opacity:'0.75', width:'50px', height:'12px', ease:Expo.easeOut});
             TweenMax.to("#" + currentId, 0.25, {top:'0', ease:Back.easeOut});
 
             // hide content and stop video
@@ -177,35 +202,27 @@ window.onload = function() {
         }
         
 
-        // update new selection
-        currentId = e.target.id;
-        if (currentId === "") {
-        	console.log("Finding parent div");
-            console.log("this has class : " + $(this).attr('class'));
-            currentId = $(this).closest('div').attr('id');;
-            console.log("this has id : " + currentId);
-        }
-        console.log("picked : " + currentId);
-
         scene.traverse (function (object)
         {
             console.log("object: " + object.name);
-            if (object.name === "pop" + currentId) {
+            if (object.name === "pop" + clicked_id) {
                 //object.rotation.y = -r;
-                TweenLite.to(object.rotation, 1, {y: -r, ease: Expo.easeOut, delay: 0.2,
+                TweenLite.to(object.rotation, 1, {y: rotCam[clicked_id], ease: Expo.easeOut, delay: 0.2,
                     onComplete: function() {
                         // show content and play video
-                        $('#' + currentId).addClass('selected').removeClass('unselected');
-                        $('#video' + currentId).get(0).play();
+                        $('#' + clicked_id).addClass('selected').removeClass('unselected');
+                        $('#video' + clicked_id).get(0).play();
                     }
                 });
             }
         });
 
     
-        TweenMax.to("#" + currentId, 0.5, {opacity:'1', width:'150px', height:'130px', ease:Expo.easeOut });
-        TweenMax.to("#" + currentId, 0.25, {top:'-40', ease:Back.easeOut});
+        TweenMax.to("#" + clicked_id, 0.5, {opacity:'1', width:'150px', height:'120px', ease:Expo.easeOut });
+        TweenMax.to("#" + clicked_id, 0.25, {top:'-40', ease:Back.easeOut});
         
+        // store current popup
+        currentId = clicked_id;
         
     }
 

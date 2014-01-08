@@ -5,16 +5,21 @@ body {
         overflow: hidden;
     }
 
-    a {
-        color: #ffffff;
-    }
 
     h1 {
     	font-size: 10px;
+        position: relative;
+        text-align: center;
+        vertical-align: middle;
+        margin-top: 0px;
     }
     p {
-    	font-size: 10px;
+    	font-size: 9px;
         display: none;
+        position: relative;
+        margin-top: 1px;
+        padding-left: 1px;
+        text-align: center;
     }
 
     video {
@@ -25,10 +30,10 @@ body {
 
     .main {
         position:absolute;
+        text-align: center;
         border: 1px solid black;
         box-shadow: 10px 10px 5px #888;
         border-radius: 12px;
-        padding: 5px;
         background-color: #ddd;
         margin: 25px;
         width: 300px;
@@ -39,26 +44,22 @@ body {
 
 
     .popup {
-        padding: 5px;
-		position: fixed;
-    	border: 1px solid grey;
+        padding: 0px;
+		position: relative;
+    	border: 1px solid #ccc;
         border-radius: 5px;
+        padding-top: 5px;
+        padding-bottom: 5px;
         color: black;
         font-size: 6px;
-        width: 100px;
-        height: 20px;
+        width: 50px;
+        height: 12px;
         background-color: #fff;
-        opacity: 0.75;
+        opacity: 0.85;
         cursor: pointer;
         display: inline-block;
     }
 
-    .selected{
-        background-color: #fff;
-    }
-    .unselected{
-        background-color: #fff;
-    }
 
     .selected p{
         display: inline-block;
